@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Game of Life - Control Panel{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800">Game Control Panel</h1>
+        <p class="text-gray-600 mt-2">Manage game evolution and settings</p>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <!-- Game Controls -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Game Controls</h2>
+            <div class="flex space-x-4">
+                <button id="startBtn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                    Start Evolution
+                </button>
+                <button id="pauseBtn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                    Pause Evolution
+                </button>
+                <button id="resetBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                    Reset Grid
+                </button>
+            </div>
+        </div>
+
+        <!-- Speed Control -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Evolution Speed</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-600">Slower</span>
+                <input type="range"
+                       id="speedControl"
+                       class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                       min="0.5"
+                       max="20"
+                       step="0.5"
+                       value="{{ settings.default_speed }}">
+                <span class="text-gray-600">Faster</span>
+            </div>
+            <div class="text-center mt-2">
+                <span class="text-gray-600">Current Speed: </span>
+                <span id="speedValue" class="font-semibold">1.0x</span>
+            </div>
+        </div>
+
+        <!-- Grid Size Control -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Grid Size</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-600">Smaller</span>
+                <input type="range"
+                       id="gridSizeControl"
+                       class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                       min="{{ settings.min_grid_size }}"
+                       max="{{ settings.max_grid_size }}"
+                       step="10"
+                       value="{{ settings.default_grid_size }}">
+                <span class="text-gray-600">Larger</span>
+            </div>
+            <div class="text-center mt-2">
+                <span class="text-gray-600">Current Size: </span>
+                <span id="gridSizeValue" class="font-semibold">50x50</span>
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div class="bg-gray-50 rounded-lg p-4">
+            <h2 class="text-2xl font-semibold mb-4">Current Status</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
+                    <span class="text-gray-600">Evolution State:</span>
+                    <span id="evolutionState" class="ml-2 font-semibold">Paused</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-gray-600">Generation:</span>
+                    <span id="generationCount" class="ml-2 font-semibold">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/control.js') }}"></script>
+{% endblock %}

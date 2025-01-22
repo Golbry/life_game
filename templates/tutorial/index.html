@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Game of Life - Tutorial{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Tutorial Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800">Game of Life Tutorial</h1>
+        <p class="text-gray-600 mt-2">Learn how to play through interactive lessons</p>
+    </div>
+
+    <!-- Tutorial Progress -->
+    <div class="max-w-4xl mx-auto mb-8">
+        <div class="bg-white rounded-lg shadow-lg p-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Progress</span>
+                <span class="text-gray-600" id="progressText">Step <span id="currentStep">1</span> of {{ steps|length }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progressBar" class="bg-blue-500 rounded-full h-2 transition-all duration-300" style="width: 20%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Content -->
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Step Content -->
+            <div id="tutorialContent" class="p-6">
+                {% for step in steps %}
+                <div class="tutorial-step {% if not loop.first %}hidden{% endif %}" data-step="{{ step.id }}">
+                    <h2 class="text-2xl font-semibold mb-4">{{ step.title }}</h2>
+                    <div class="mb-6">
+                        <img src="{{ step.image_url }}"
+                             alt="Tutorial step {{ step.id }}"
+                             class="w-full rounded-lg shadow-md mb-4">
+                        <p class="text-gray-700 leading-relaxed">{{ step.content }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center px-6 py-4 bg-gray-50 border-t">
+                <button id="prevStep"
+                        class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Previous
+                </button>
+                <div class="flex space-x-2">
+                    {% for step in steps %}
+                    <div class="step-indicator w-3 h-3 rounded-full {% if loop.first %}bg-blue-500{% else %}bg-gray-300{% endif %}"
+                         data-step="{{ step.id }}"></div>
+                    {% endfor %}
+                </div>
+                <button id="nextStep"
+                        class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-200">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Demo Area -->
+    <div class="max-w-4xl mx-auto mt-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-semibold mb-4">Try It Yourself</h3>
+            <div id="demoGrid" class="w-full aspect-square bg-gray-100 rounded-lg border border-gray-200">
+                <!-- Interactive grid will be rendered here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+{% endblock %}

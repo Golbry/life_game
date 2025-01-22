@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}Game of Life - Game Board{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 max-w-7xl relative">
+    <!-- Game Header -->
+    <div class="mb-8 text-center">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">Game of Life</h1>
+        <p class="text-gray-600">Click cells to toggle their state or use the controls below</p>
+    </div>
+
+    <!-- Main Game Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-6 gap-4">
+        <!-- Game Controls (Left Sidebar) -->
+        <div class="lg:col-span-1 bg-white rounded-lg shadow-lg p-4">
+            <h2 class="text-xl font-semibold mb-4">Controls</h2>
+
+            <!-- Game Control Buttons -->
+            <div class="space-y-4 mb-6">
+                <button id="startBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+                    Start Evolution
+                </button>
+                <button id="pauseBtn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+                    Pause Evolution
+                </button>
+                <button id="randomBtn" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+                    Random Population
+                </button>
+                <button id="resetBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+                    Clear Grid
+                </button>
+                <button id="saveTemplateBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+                    Save as Template
+                </button>
+            </div>
+
+            <!-- Speed Control -->
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Speed: <span id="speedValue">1x</span>
+                </label>
+                <input type="range" id="speedControl"
+                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                       min="0.5" max="20" step="0.5" value="{{ default_speed }}">
+            </div>
+
+            <!-- Grid Size Control -->
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Grid Size: <span id="gridSizeValue">{{ grid_size }}x{{ grid_size }}</span>
+                </label>
+                <input type="range" id="gridSizeControl"
+                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                       min="20" max="100" step="5" value="{{ grid_size }}">
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>20x20</span>
+                    <span>100x100</span>
+                </div>
+            </div>
+        </div>
+
+    <!-- Game Grid (Center) -->
+        <div class="lg:col-span-4 bg-white rounded-lg shadow-lg p-4">
+            <div id="gameGrid" class="w-full aspect-square bg-gray-100 border border-gray-300 rounded-lg overflow-hidden relative select-none"
+                 style="max-width: 960px; margin: 0 auto; transform: translate3d(0,0,0); will-change: transform;">
+                <!-- Grid will be rendered here by JavaScript with GPU acceleration -->
+                <div id="gridOverlay" class="absolute inset-0 pointer-events-none z-10">
+                    <!-- Template preview overlay -->
+                </div>
+                <div class="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/5 to-black/5"></div>
+            </div>
+
+            <style>
+                .grid-cell {
+                    transition: all 0.15s ease;
+                    will-change: transform, background-color;
+                    cursor: pointer;
+                }
+                .grid-cell:hover {
+                    transform: scale(1.1);
+                    z-index: 10;
+                }
+                .grid-cell.alive {
+                    background-color: black !important;
+                }
+                .preview-cell {
+                    background-color: rgba(59, 130, 246, 0.3);
+                    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.5);
+                    transition: all 0.15s ease;
+                }
+                .template-preview-overlay {
+                    pointer-events: none;
+                    transition: all 0.15s ease;
+                    animation: fadeIn 0.2s ease;
+                }
+                .template-drag-preview {
+                    pointer-events: none;
+                    transform: scale(0.3);
+                    opacity: 0.8;
+                    position: fixed;
+                    z-index: 1000;
+                    background: white;
+                    border: 2px solid #3b82f6;
+                    border-radius: 0.5rem;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    transition: all 0.15s ease;
+                }
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                .grid-overlay {
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                    z-index: 10;
+                }
+                #gameGrid {
+                    transition: all 0.3s ease;
+                }
+                #gameGrid.drag-over {
+                    transform: scale(1.02);
+                }
+            </style>
+
+            <style>
+                .grid-cell {
+                    transition: all 0.15s ease;
+                    will-change: transform, background-color;
+                }
+                .preview-cell {
+                    background-color: rgba(59, 130, 246, 0.3) !important;
+                    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.5);
+                    transition: all 0.15s ease;
+                }
+                .template-drag-preview {
+                    pointer-events: none;
+                    transform: scale(0.3);
+                    opacity: 0.8;
+                    position: fixed;
+                    z-index: 1000;
+                    background: white;
+                    border: 2px solid #3b82f6;
+                    border-radius: 0.5rem;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    transition: all 0.15s ease;
+                }
+                .grid-overlay {
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                    z-index: 10;
+                }
+                .template-preview-container {
+                    position: absolute;
+                    pointer-events: none;
+                    transition: all 0.15s ease;
+                    z-index: 20;
+                }
+                .template-preview {
+                    max-width: 100px;
+                    max-height: 100px;
+                    transition: all 0.15s ease;
+                }
+                .template-item {
+                    cursor: grab;
+                    transition: all 0.15s ease;
+                }
+                .template-item:active {
+                    cursor: grabbing;
+                    transform: scale(0.98);
+                }
+                .template-preview-overlay {
+                    position: absolute;
+                    background: rgba(59, 130, 246, 0.1);
+                    border: 2px dashed rgba(59, 130, 246, 0.5);
+                    border-radius: 4px;
+                    pointer-events: none;
+                    z-index: 30;
+                    opacity: 1;
+                    transform: scale(1);
+                    transition: all 0.15s ease;
+                }
+                .template-preview-overlay.hiding {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+            </style>
+        </div>
+
+        <!-- Floating Template Panel -->
+        <div id="templatePanel" class="fixed right-4 top-24 w-72 bg-white rounded-lg shadow-xl p-4 transition-all duration-300 transform translate-x-0">
+            <!-- Toggle Button -->
+            <button id="toggleTemplatePanel" class="absolute -left-12 top-4 bg-white p-2 rounded-l-lg shadow-lg hover:bg-gray-50">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+
+            <h3 class="text-lg font-semibold mb-4">Templates</h3>
+
+            <!-- Template List -->
+            <div class="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+                <!-- Preset Templates -->
+                <div class="space-y-2">
+                    <h4 class="font-medium text-gray-600">Preset Patterns</h4>
+                    <div id="presetTemplates" class="grid grid-cols-1 gap-2">
+                        <!-- Template items will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Local Templates -->
+                <div class="space-y-2">
+                    <h4 class="font-medium text-gray-600">My Templates</h4>
+                    <div id="localTemplates" class="grid grid-cols-1 gap-2">
+                        <!-- Local template items will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .template-card {
+                    touch-action: none;
+                    user-select: none;
+                }
+                .template-card:active {
+                    cursor: grabbing;
+                }
+                .preview-cell {
+                    transition: background-color 0.15s ease;
+                }
+                .preview-cell.bg-black {
+                    background-color: #000;
+                }
+                .preview-cell.bg-white {
+                    background-color: #fff;
+                }
+            </style>
+
+            <!-- Save Template Button -->
+            <button id="saveCurrentTemplate" class="w-full mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                </svg>
+                Save Current Pattern
+            </button>
+        </div>
+
+        <!-- Save Template Modal -->
+        <div id="saveTemplateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+            <div class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-96">
+                <h3 class="text-xl font-semibold mb-4">Save Template</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Template Name</label>
+                        <input type="text" id="templateName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="templateDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button id="cancelSaveTemplate" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirmSaveTemplate" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics (Right Sidebar) -->
+        <div class="lg:col-span-1 bg-white rounded-lg shadow-lg p-4">
+            <h2 class="text-xl font-semibold mb-4">Statistics</h2>
+
+            <!-- Real-time Stats -->
+            <div class="space-y-4">
+                <div class="stat-item">
+                    <label class="text-gray-600">Generation:</label>
+                    <span id="generationCount" class="font-bold">0</span>
+                </div>
+                <div class="stat-item">
+                    <label class="text-gray-600">Alive Cells:</label>
+                    <span id="aliveCellCount" class="font-bold">0</span>
+                </div>
+                <div class="stat-item">
+                    <label class="text-gray-600">Grid Size:</label>
+                    <span id="currentGridSize" class="font-bold">{{ grid_size }}x{{ grid_size }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Game Scripts -->
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% endblock %}

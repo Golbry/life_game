@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Game of Life - Statistics{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800">Statistics Dashboard</h1>
+        <p class="text-gray-600 mt-2">Track and analyze game evolution patterns</p>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Games -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600">Total Games</p>
+                    <h3 class="text-2xl font-bold">{{ total_games }}</h3>
+                </div>
+                <div class="bg-blue-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Max Generation -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600">Max Generation</p>
+                    <h3 class="text-2xl font-bold">{{ max_generation }}</h3>
+                </div>
+                <div class="bg-green-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Alive Cells -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600">Avg Alive Cells</p>
+                    <h3 class="text-2xl font-bold">{{ avg_alive_cells }}</h3>
+                </div>
+                <div class="bg-purple-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Evolution History Chart -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Evolution History</h2>
+            <div class="aspect-[4/3] bg-gray-50">
+                <canvas id="evolutionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Population Trends Chart -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Population Trends</h2>
+            <div class="aspect-[4/3] bg-gray-50">
+                <canvas id="populationChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Statistics -->
+    <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Real-time Statistics</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="stat-item">
+                <p class="text-gray-600">Current Generation</p>
+                <h4 class="text-2xl font-bold" id="currentGeneration">0</h4>
+            </div>
+            <div class="stat-item">
+                <p class="text-gray-600">Alive Cells</p>
+                <h4 class="text-2xl font-bold" id="aliveCells">0</h4>
+            </div>
+            <div class="stat-item">
+                <p class="text-gray-600">Total Time</p>
+                <h4 class="text-2xl font-bold" id="totalTime">0s</h4>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js -->
+<script src="https://unpkg.com/chart.js@4.4.1/dist/chart.umd.js"></script>
+<!-- Statistics JS -->
+<script src="{{ url_for('static', filename='js/statistics.js') }}" defer></script>
+{% endblock %}

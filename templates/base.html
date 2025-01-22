@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}生命游戏{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery -->
+    <script src="https://unpkg.com/jquery@3.7.1/dist/jquery.js"></script>
+    <!-- Lodash -->
+    <script src="https://unpkg.com/lodash@4.17.21/lodash.js"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="{{ url_for('game.board') }}" class="text-xl font-bold text-gray-800">Game of Life</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="{{ url_for('game.board') }}"
+                       class="text-gray-600 hover:text-gray-800 {{ 'text-blue-600' if request.endpoint == 'game.board' }}">Game Board</a>
+                    <a href="{{ url_for('template.library') }}"
+                       class="text-gray-600 hover:text-gray-800 {{ 'text-blue-600' if request.endpoint == 'template.library' }}">
+                        <span class="inline-flex items-center">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            Templates
+                        </span>
+                    </a>
+                    <a href="{{ url_for('statistics.dashboard') }}"
+                       class="text-gray-600 hover:text-gray-800 {{ 'text-blue-600' if request.endpoint == 'statistics.dashboard' }}">Statistics</a>
+                    <a href="{{ url_for('tutorial.index') }}"
+                       class="text-gray-600 hover:text-gray-800 {{ 'text-blue-600' if request.endpoint == 'tutorial.index' }}">Tutorial</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white shadow-lg mt-8">
+        <div class="container mx-auto px-4 py-6">
+            <div class="text-center text-gray-600">
+                <p>&copy; {{ current_datetime.year }} Game of Life. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
